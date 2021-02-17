@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load hitcount_tags %}
+{% load humanize %}
+{% block content %}
+<article class="media content-section">
+  <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
+  <div class="media-body">
+    <div class="article-metadata">
+      <a class="mr-2" href="#">{{ object.author }}</a>
+      <small class="text-muted">{{ object.date_posted|timesince }} | {% get_hit_count for post %} <i class="fa fa-eye" aria-hidden="true" ></i></small>
+      {% if object.author == user %}
+      <div>
+        <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' object.id %}">Update</a>
+        {% include 'blog/post_confirm_delete.html' %}
+      </div>
+      {% endif %}
+    </div>
+    <h2 class="article-title">{{ object.title }}</h2>
+    <p>{{ post.date_posted|date }} | {{ post.categories.all.0}}</p>
+    {% if post.thumbnail %}
+      <img style="height: 300px" src="{{ post.thumbnail.url }}" alt="featured-img" class="rounded-md">
+    {% else %}
+      <img style="height: 300px" src="{{ post.image_url }}" alt="featured-img" class="rounded-md">
+    {% endif %}
+    <p class="article-content">{{ object.content | safe }}</p>
+    <div class="Tags gap-xy-2 text-center mt-6">
+      {% for cat in post.categories.all %}
+      <a href="#" class="badge badge-pill badge-secondary">{{cat}}</a>
+      {% endfor %}
+    </div>
+    <!--Comments-->
+    <div class="section">
+      <div class="container">
+        <h2>Comments({{post_comment_count}})</h2>
+        <div class="row">
+          <div class="col-lg-8 mx-auto">
+            <!--Display content-->
+            <div class="media-list">
+              <div>
+                {% for comment in post_comment %}
+                <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
+                <div class="media-body">
+                  <div class="small-1">
+                    <b>{{ comment.user }}</b>
+                    <time class="ml-4 opacity-70 small-3">{{comment.date|date}}</time>
+                  </div>
+                  <p>{{comment.content}}</p>
+
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            <!--Display the form-->
+            <form method="post" action="{% url 'post-detail' post.id %}">
+              {% csrf_token %}
+              <div class="form-group">
+                {{ form }}
+              </div>
+              <button class="btn btn-primary btn-block" type="submit">Comment</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+{% endblock content %}
